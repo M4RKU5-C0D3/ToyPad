@@ -2,7 +2,6 @@
 
 import usb.core
 import usb.util
-import signal
 import numpy as np
 from time import sleep
 
@@ -28,13 +27,12 @@ RIGHT_PAD  = 3
 TAG_INSERTED = 0
 TAG_REMOVED  = 1
 
-# UIDs can be retrieved with Android App (most probably in hexadecimal)
-uidGandalf      = [4, 22, 125, 210, 161, 64, 129] # LEGO Dimension Gandalf
-uidWildStyle    = [4, 77, 178, 250, 157, 72, 128]
-uidBadman       = [4, 243, 67, 154, 19, 67, 128]
-uidAbbey        = [4, 103, 114, 146, 40, 73, 128]
-uidCustom01     = [4, 71, 49, 242, 124, 73, 129]
-uidBadCop       = [0x40,0x41,0x65,0x1a,0xa3,0x48,0x80]
+uidGandalf      = [0x40,0x16,0x7D,0xD2,0xA1,0x40,0x81]
+uidWildStyle    = [0x40,0x4D,0xB2,0xFA,0x9D,0x48,0x80]
+uidBadman       = [0x40,0xF3,0x43,0x9A,0x13,0x43,0x80]
+uidAbbey        = [0x40,0x67,0x72,0x92,0x28,0x49,0x80]
+uidCustom01     = [0x40,0x47,0x31,0xF2,0x7C,0x49,0x81]
+uidBadCop       = [0x40,0x41,0x65,0x1A,0xA3,0x48,0x80]
 uidBenny        = [0x40,0x9E,0xE0,0x32,0x5C,0x49,0x84]
 uidChase        = [0x40,0x73,0xFF,0x5A,0xA7,0x4A,0x80]
 
@@ -107,14 +105,9 @@ def tag_removed(pad_num,uid_bytes):
     switch_pad(pad_num, OFF)
     return
 
-def signal_term_handler(signal, frame):
-    print('got SIGTERM')
-    exit(0)
-
 def main():
     init_usb()
     np.set_printoptions(formatter={'int':hex})
-    signal.signal(signal.SIGTERM, signal_term_handler)
     if dev != None :
         while True:
             try:
@@ -136,10 +129,8 @@ def main():
 
             except usb.USBError as err:
                 pass
-            except KeyboardInterrupt:
-                print('interrupted')
-            finally:
-                switch_pad(ALL_PADS,OFF)
+
+        switch_pad(ALL_PADS,OFF)
     return
 
 if __name__ == '__main__':
