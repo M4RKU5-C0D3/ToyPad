@@ -119,24 +119,19 @@ def main():
             try:
                 in_packet = dev.read(0x81, 32, timeout = 10)
                 bytelist = list(in_packet)
-
                 if not bytelist:
                     pass
                 elif bytelist[0] != 0x56: # NFC packets start with 0x56
                     pass
                 else:
-                    pad_num = bytelist[2]
-                    uid_bytes = bytelist[6:13]
+                    pad = bytelist[2]
+                    uid = bytelist[6:13]
                     action = bytelist[5]
-                    if action == TAG_INSERTED :
-                        tag_inserted(pad_num,uid_bytes)
-                    else:
-                        tag_removed(pad_num,uid_bytes)
-
+                    if   action == TAG_INSERTED : tag_inserted(pad,uid)
+                    elif action == TAG_REMOVED  : tag_removed(pad,uid)
+                    else : print('unkown action: ' + action)
             except usb.USBError as err:
                 pass
-
-        switch_pad(ALL_PADS,OFF)
     return
 
 if __name__ == '__main__':
