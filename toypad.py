@@ -38,20 +38,15 @@ uidChase        = [0x04,0x73,0xFF,0x5A,0xA7,0x4A,0x80]
 
 def init_usb():
     global dev
-
     dev = usb.core.find(idVendor=0x0e6f, idProduct=0x0241)
-
     if dev is None:
         print('Device not found')
     else:
         if dev.is_kernel_driver_active(0):
             dev.detach_kernel_driver(0)
-
         print((usb.util.get_string(dev, dev.iProduct)))
-
         dev.set_configuration()
         dev.write(1,TOYPAD_INIT)
-
     return dev
 
 def send_command(dev,command):
@@ -73,11 +68,11 @@ def send_command(dev,command):
 
     return
 
-def switch_pad(pad, colour):
+def pad(pad, colour):
     send_command(dev,[0x55, 0x06, 0xc0, 0x02, pad, colour[0], colour[1], colour[2],])
     return
 
-def uid_compare(uid1, uid2):
+def compare(uid1, uid2):
     match = True
     for i in range(0,7):
         if (uid1[i] != uid2[i]) :
@@ -89,26 +84,26 @@ def presence(present,pad,uid):
     except: print("presence.sh not found")
     return
 
-def tag_inserted(pad_num,uid_bytes):
-    print(np.array(uid_bytes),'detected on pad',pad_num)
-    if uid_compare(uid_bytes,uidCustom01): 
-        switch_pad(pad_num, WHITE)
-        if pad_num == CENTER_PAD: presence(True,pad_num,uid_bytes)
-    elif uid_compare(uid_bytes, uidGandalf): switch_pad(pad_num, YELLOW)
-    elif uid_compare(uid_bytes, uidBadCop): switch_pad(pad_num, ORANGE)
-    elif uid_compare(uid_bytes, uidWildStyle): switch_pad(pad_num, PINK)
-    elif uid_compare(uid_bytes, uidBadman): switch_pad(pad_num, BLUE)
-    elif uid_compare(uid_bytes, uidAbbey): switch_pad(pad_num, TEAL)
-    elif uid_compare(uid_bytes, uidBenny): switch_pad(pad_num, GREEN)
-    elif uid_compare(uid_bytes, uidChase): switch_pad(pad_num, PURPLE)
-    else: switch_pad(pad_num, RED)
+def tag_inserted(pad,uid):
+    print(np.array(uid),'detected on pad',pad)
+    if compare(uid,uidCustom01): 
+        pad(pad, WHITE)
+        if pad == CENTER_PAD: presence(True,pad,uid)
+    elif compare(uid, uidGandalf): pad(pad, YELLOW)
+    elif compare(uid, uidBadCop): pad(pad, ORANGE)
+    elif compare(uid, uidWildStyle): pad(pad, PINK)
+    elif compare(uid, uidBadman): pad(pad, BLUE)
+    elif compare(uid, uidAbbey): pad(pad, TEAL)
+    elif compare(uid, uidBenny): pad(pad, GREEN)
+    elif compare(uid, uidChase): pad(pad, PURPLE)
+    else: pad(pad, RED)
     return
 
-def tag_removed(pad_num,uid_bytes):
-    print(np.array(uid_bytes),'removed from pad',pad_num)
-    if uid_compare(uid_bytes,uidCustom01):
-        if pad_num == CENTER_PAD: presence(False,pad_num,uid_bytes)
-    switch_pad(pad_num, OFF)
+def tag_removed(pad,uid):
+    print(np.array(uid),'removed from pad',pad)
+    if compare(uid,uidCustom01):
+        if pad == CENTER_PAD: presence(False,pad,uid)
+    pad(pad, OFF)
     return
 
 def main():
