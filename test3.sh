@@ -24,7 +24,7 @@ TAG_REMOVED  = 1
 uidGandalf = [4, 22, 125, 210, 161, 64, 129] # LEGO Dimension Gandalf
 uidWildStyle = [4, 77, 178, 250, 157, 72, 128]
 uidBadman = [4, 243, 67, 154, 19, 67, 128]
-
+uidCustom01 = [4, 71, 49, 242, 124, 73, 129]
 
 def init_usb():
     global dev
@@ -77,6 +77,19 @@ def uid_compare(uid1, uid2):
             match = False
     return match 
 
+def tag_inserted(pad_num,uid_bytes):
+    print 'inserted',pad_num,uid_bytes
+    match = uid_compare(uid_bytes, uidCustom01)
+    if match:
+        switch_pad(pad_num, GREEN)
+    else:
+        switch_pad(pad_num, RED)
+    return
+
+def tag_removed(pad_num,uid_bytes):
+    print 'removed',pad_num,uid_bytes
+    switch_pad(pad_num, OFF)
+    return
 
 def main():
     init_usb()
@@ -93,19 +106,11 @@ def main():
                 else:
                     pad_num = bytelist[2]
                     uid_bytes = bytelist[6:13]
-                    match = uid_compare(uid_bytes, uidGandalf)
                     action = bytelist[5]
                     if action == TAG_INSERTED :
-                        if match:
-                            # Gandalf
-                            switch_pad(pad_num, GREEN)
-                        else:
-                            # some other tag
-                            switch_pad(pad_num, RED)
-                            print uid_bytes
+                        tag_inserted(pad_num,uid_bytes)
                     else:
-                        # some tag removed
-                        switch_pad(pad_num, OFF)
+                        tag_removed(pad_num,uid_bytes)
 
             except usb.USBError, err:
                 pass
