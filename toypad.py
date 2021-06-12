@@ -49,7 +49,7 @@ def init_usb():
         dev.write(1,TOYPAD_INIT)
     return dev
 
-def send_command(dev,command):
+def pad_command(dev,command):
 
     # calculate checksum
     checksum = 0
@@ -68,8 +68,8 @@ def send_command(dev,command):
 
     return
 
-def pad(pad, colour):
-    send_command(dev,[0x55, 0x06, 0xc0, 0x02, pad, colour[0], colour[1], colour[2],])
+def pad_color(pad, colour):
+    pad_command(dev,[0x55, 0x06, 0xc0, 0x02, pad, colour[0], colour[1], colour[2],])
     return
 
 def compare(uid1, uid2):
@@ -84,26 +84,26 @@ def presence(present,pad,uid):
     except: print("presence.sh not found")
     return
 
-def tag_inserted(pad,uid):
+def tag_detected(pad,uid):
     print(np.array(uid),'detected on pad',pad)
     if compare(uid,uidCustom01): 
-        pad(pad, WHITE)
+        pad_color(pad, WHITE)
         if pad == CENTER_PAD: presence(True,pad,uid)
-    elif compare(uid, uidGandalf): pad(pad, YELLOW)
-    elif compare(uid, uidBadCop): pad(pad, ORANGE)
-    elif compare(uid, uidWildStyle): pad(pad, PINK)
-    elif compare(uid, uidBadman): pad(pad, BLUE)
-    elif compare(uid, uidAbbey): pad(pad, TEAL)
-    elif compare(uid, uidBenny): pad(pad, GREEN)
-    elif compare(uid, uidChase): pad(pad, PURPLE)
-    else: pad(pad, RED)
+    elif compare(uid, uidGandalf)   : pad_color(pad, YELLOW)
+    elif compare(uid, uidBadCop)    : pad_color(pad, ORANGE)
+    elif compare(uid, uidWildStyle) : pad_color(pad, PINK)
+    elif compare(uid, uidBadman)    : pad_color(pad, BLUE)
+    elif compare(uid, uidAbbey)     : pad_color(pad, TEAL)
+    elif compare(uid, uidBenny)     : pad_color(pad, GREEN)
+    elif compare(uid, uidChase)     : pad_color(pad, PURPLE)
+    else: pad_color(pad, RED)
     return
 
 def tag_removed(pad,uid):
     print(np.array(uid),'removed from pad',pad)
     if compare(uid,uidCustom01):
         if pad == CENTER_PAD: presence(False,pad,uid)
-    pad(pad, OFF)
+    pad_color(pad, OFF)
     return
 
 def main():
@@ -122,7 +122,7 @@ def main():
                     pad = bytelist[2]
                     uid = bytelist[6:13]
                     action = bytelist[5]
-                    if   action == TAG_INSERTED : tag_inserted(pad,uid)
+                    if   action == TAG_INSERTED : tag_detected(pad,uid)
                     elif action == TAG_REMOVED  : tag_removed(pad,uid)
                     else : print('unkown action: ' + action)
             except usb.USBError as err:
