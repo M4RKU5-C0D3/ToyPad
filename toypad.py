@@ -3,6 +3,7 @@ import usb.core
 import usb.util
 import numpy as np
 import os
+import subprocess
 from time import sleep
 
 TOYPAD_INIT = [0x55, 0x0f, 0xb0, 0x01, 0x28, 0x63, 0x29, 0x20, 0x4c, 0x45, 0x47, 0x4f, 0x20, 0x32, 0x30, 0x31, 0x34, 0xf7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
@@ -79,9 +80,9 @@ def compare(uid1, uid2):
             match = False
     return match 
 
-def presence(present,pad,uid):
-    try: os.system("presence.sh " + presence + " " + pad + " " + uid)
-    except: print("presence.sh not found")
+def presence(present,pad,uid):    
+    try: subprocess.call([os.path.dirname(__file__) + '/presence.sh'])
+    except: print('presence.sh not found')
     return
 
 def tag_detected(pad,uid):
