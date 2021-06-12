@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 
 import usb.core
 import usb.util
@@ -34,7 +33,7 @@ uidBadman       = [0x04,0xF3,0x43,0x9A,0x13,0x43,0x80]
 uidAbbey        = [0x04,0x67,0x72,0x92,0x28,0x49,0x80]
 uidCustom01     = [0x04,0x47,0x31,0xF2,0x7C,0x49,0x81]
 uidBadCop       = [0x04,0x41,0x65,0x1A,0xA3,0x48,0x80]
-uidBenny        = [0x04,0x9E,0xE0,0x32,0x5C,0x49,0x84]
+uidBenny        = [0x04,0x9E,0x0E,0x32,0x5C,0x49,0x84]
 uidChase        = [0x04,0x73,0xFF,0x5A,0xA7,0x4A,0x80]
 
 def init_usb():
@@ -55,7 +54,6 @@ def init_usb():
 
     return dev
 
-
 def send_command(dev,command):
 
     # calculate checksum
@@ -75,11 +73,9 @@ def send_command(dev,command):
 
     return
 
-
 def switch_pad(pad, colour):
     send_command(dev,[0x55, 0x06, 0xc0, 0x02, pad, colour[0], colour[1], colour[2],])
     return
-
 
 def uid_compare(uid1, uid2):
     match = True
@@ -88,11 +84,16 @@ def uid_compare(uid1, uid2):
             match = False
     return match 
 
+def presence(present,pad,uid):
+    try: os.system("presence.sh " + presence + " " + pad + " " + uid)
+    except: print("presence.sh not found")
+    return
+
 def tag_inserted(pad_num,uid_bytes):
     print(np.array(uid_bytes),'detected on pad',pad_num)
     if uid_compare(uid_bytes,uidCustom01): 
         switch_pad(pad_num, WHITE)
-        os.system("echo 'Available'")
+        if pad_num == CENTER_PAD: presence(True,pad_num,uid_bytes)
     elif uid_compare(uid_bytes, uidGandalf): switch_pad(pad_num, YELLOW)
     elif uid_compare(uid_bytes, uidBadCop): switch_pad(pad_num, ORANGE)
     elif uid_compare(uid_bytes, uidWildStyle): switch_pad(pad_num, PINK)
@@ -105,8 +106,8 @@ def tag_inserted(pad_num,uid_bytes):
 
 def tag_removed(pad_num,uid_bytes):
     print(np.array(uid_bytes),'removed from pad',pad_num)
-    if uid_compare(uid_bytes,uidCustom01): 
-        os.system("echo 'Unavailable'")
+    if uid_compare(uid_bytes,uidCustom01):
+        if pad_num == CENTER_PAD: presence(False,pad_num,uid_bytes)
     switch_pad(pad_num, OFF)
     return
 
