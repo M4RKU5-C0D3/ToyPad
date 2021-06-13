@@ -28,14 +28,14 @@ RIGHT_PAD  = 3
 TAG_INSERTED = 0
 TAG_REMOVED  = 1
 
-uidGandalf      = [0x04,0x16,0x7D,0xD2,0xA1,0x40,0x81]
-uidWildStyle    = [0x04,0x4D,0xB2,0xFA,0x9D,0x48,0x80]
-uidBadman       = [0x04,0xF3,0x43,0x9A,0x13,0x43,0x80]
-uidAbbey        = [0x04,0x67,0x72,0x92,0x28,0x49,0x80]
-uidCustom01     = [0x04,0x47,0x31,0xF2,0x7C,0x49,0x81]
-uidBadCop       = [0x04,0x41,0x65,0x1A,0xA3,0x48,0x80]
-uidBenny        = [0x04,0x9E,0x0E,0x32,0x5C,0x49,0x84]
-uidChase        = [0x04,0x73,0xFF,0x5A,0xA7,0x4A,0x80]
+uidGandalf      = "04167DD2A14081"
+uidWildStyle    = "044DB2FA9D4880"
+uidBadman       = "04F3439A134380"
+uidAbbey        = "04677292284980"
+uidCustom01     = "044731F27C4981"
+uidBadCop       = "0441651AA34880"
+uidBenny        = "049E0E325C4984"
+uidChase        = "0473FF5AA74A80"
 
 def init_usb():
     global dev
@@ -73,36 +73,34 @@ def pad_color(pad, colour):
     pad_command(dev,[0x55, 0x06, 0xc0, 0x02, pad, colour[0], colour[1], colour[2],])
     return
 
-def compare(uid1, uid2):
-    match = True
-    for i in range(0,7):
-        if (uid1[i] != uid2[i]) :
-            match = False
-    return match 
+def uidstr(uid):
+    uid = np.array(uid)
+    uid = ("{:0>2X}"*len(uid)).format(*tuple(uid))
+    return uid
 
 def presence(present,pad,uid):    
-    try: subprocess.call([os.path.dirname(__file__) + '/presence.sh'])
+    try: subprocess.call([os.path.dirname(__file__) + '/presence.sh',str(present),str(pad),uid])
     except: print('presence.sh not found')
     return
 
 def tag_detected(pad,uid):
-    print(np.array(uid),'detected on pad',pad)
-    if compare(uid,uidCustom01): 
+    print(uid,'detected on pad',pad)
+    if uid == uidCustom01: 
         pad_color(pad, WHITE)
         if pad == CENTER_PAD: presence(True,pad,uid)
-    elif compare(uid, uidGandalf)   : pad_color(pad, YELLOW)
-    elif compare(uid, uidBadCop)    : pad_color(pad, ORANGE)
-    elif compare(uid, uidWildStyle) : pad_color(pad, PINK)
-    elif compare(uid, uidBadman)    : pad_color(pad, BLUE)
-    elif compare(uid, uidAbbey)     : pad_color(pad, TEAL)
-    elif compare(uid, uidBenny)     : pad_color(pad, GREEN)
-    elif compare(uid, uidChase)     : pad_color(pad, PURPLE)
+    elif uid == uidGandalf   : pad_color(pad, YELLOW)
+    elif uid == uidBadCop    : pad_color(pad, ORANGE)
+    elif uid == uidWildStyle : pad_color(pad, PINK)
+    elif uid == uidBadman    : pad_color(pad, BLUE)
+    elif uid == uidAbbey     : pad_color(pad, TEAL)
+    elif uid == uidBenny     : pad_color(pad, GREEN)
+    elif uid == uidChase     : pad_color(pad, PURPLE)
     else: pad_color(pad, RED)
     return
 
 def tag_removed(pad,uid):
-    print(np.array(uid),'removed from pad',pad)
-    if compare(uid,uidCustom01):
+    print(uid,'removed from pad',pad)
+    if uid == uidCustom01:
         if pad == CENTER_PAD: presence(False,pad,uid)
     pad_color(pad, OFF)
     return
@@ -121,7 +119,7 @@ def main():
                     pass
                 else:
                     pad = bytelist[2]
-                    uid = bytelist[6:13]
+                    uid = uidstr(bytelist[6:13])
                     action = bytelist[5]
                     if   action == TAG_INSERTED : tag_detected(pad,uid)
                     elif action == TAG_REMOVED  : tag_removed(pad,uid)
