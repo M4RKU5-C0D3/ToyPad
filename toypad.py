@@ -4,7 +4,8 @@ import usb.util
 import numpy as np
 import os
 import subprocess
-from time import sleep
+import time
+import datetime as dt
 
 TOYPAD_INIT = [0x55, 0x0f, 0xb0, 0x01, 0x28, 0x63, 0x29, 0x20, 0x4c, 0x45, 0x47, 0x4f, 0x20, 0x32, 0x30, 0x31, 0x34, 0xf7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
 
@@ -105,11 +106,27 @@ def tag_removed(pad,uid):
     pad_color(pad, OFF)
     return
 
+def pom_init():
+    global now, pom
+    now = dt.datetime.now()
+    pom = dt.datetime.now()
+    return
+
+def pom_tick():
+    global now, pom
+    if pom <= now :
+        pom = now + dt.timedelta(0,10)
+        print('pomodoro!',now.strftime('%H:%M:%S'))
+    now = dt.datetime.now()
+    return
+
 def main():
     init_usb()
+    pom_init()
     np.set_printoptions(formatter={'int':hex})
     if dev != None :
         while True:
+            # toy pad operations
             try:
                 in_packet = dev.read(0x81, 32, timeout = 10)
                 bytelist = list(in_packet)
@@ -126,6 +143,8 @@ def main():
                     else : print('unkown action: ' + action)
             except usb.USBError as err:
                 pass
+            # pomodoro operations
+            pom_tick()
     return
 
 if __name__ == '__main__':
