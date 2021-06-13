@@ -73,13 +73,13 @@ def pad_color(pad, colour):
     pad_command(dev,[0x55, 0x06, 0xc0, 0x02, pad, colour[0], colour[1], colour[2],])
     return
 
-def uidstr(uid):
+def uid_str(uid):
     uid = np.array(uid)
     uid = ("{:0>2X}"*len(uid)).format(*tuple(uid))
     return uid
 
 def presence(present,pad,uid):    
-    try: subprocess.call([os.path.dirname(__file__) + '/presence.sh',str(present),str(pad),uid])
+    try: subprocess.call([os.path.dirname(__file__) + '/presence.sh','1' if present else '0',str(pad),uid])
     except: print('presence.sh not found')
     return
 
@@ -119,7 +119,7 @@ def main():
                     pass
                 else:
                     pad = bytelist[2]
-                    uid = uidstr(bytelist[6:13])
+                    uid = uid_str(bytelist[6:13])
                     action = bytelist[5]
                     if   action == TAG_INSERTED : tag_detected(pad,uid)
                     elif action == TAG_REMOVED  : tag_removed(pad,uid)
