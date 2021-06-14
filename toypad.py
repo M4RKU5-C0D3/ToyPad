@@ -37,6 +37,7 @@ uidCustom01     = "044731F27C4981"
 uidBadCop       = "0441651AA34880"
 uidBenny        = "049E0E325C4984"
 uidChase        = "0473FF5AA74A80"
+uidMarkus       = "045ACC125D4981"
 
 def init_usb():
     global dev
@@ -86,7 +87,7 @@ def presence(present,pad,uid):
 
 def tag_detected(pad,uid):
     print(uid,'detected on pad',pad)
-    if uid == uidCustom01: 
+    if uid == uidMarkus: 
         pad_color(pad, WHITE)
         if pad == CENTER_PAD: presence(True,pad,uid)
     elif uid == uidGandalf   : pad_color(pad, YELLOW)
@@ -97,6 +98,8 @@ def tag_detected(pad,uid):
     elif uid == uidBenny     : pad_color(pad, GREEN)
     elif uid == uidChase     : pad_color(pad, PURPLE)
     else: pad_color(pad, RED)
+    time.sleep(1)
+    pad_color(ALL_PADS,OFF)
     return
 
 def tag_removed(pad,uid):
@@ -115,8 +118,10 @@ def pom_init():
 def pom_tick():
     global now, pom
     if pom <= now :
-        pom = now + dt.timedelta(0,10)
-        print('pomodoro!',now.strftime('%H:%M:%S'))
+        pom = now + dt.timedelta(0,60)
+        pad_color(ALL_PADS,RED)
+        time.sleep(1)
+        pad_color(ALL_PADS,OFF)
     now = dt.datetime.now()
     return
 
