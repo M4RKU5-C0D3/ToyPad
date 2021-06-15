@@ -1,0 +1,9 @@
+[Unit]
+Description=ToyPad
+
+[Service]
+Type=simple
+ExecStart=${CPD}/toypad.py
+
+[Install]
+WantedBy=multi-user.target

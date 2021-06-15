@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 import usb.core
 import usb.util
@@ -118,7 +119,7 @@ def pom_init():
 def pom_tick():
     global now, pom
     if pom <= now :
-        pom = now + dt.timedelta(0,60)
+        pom = now + dt.timedelta(0,1800)
         pad_color(ALL_PADS,RED)
         time.sleep(1)
         pad_color(ALL_PADS,OFF)
