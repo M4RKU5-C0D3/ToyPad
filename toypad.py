@@ -40,7 +40,18 @@ uidBenny        = "049E0E325C4984"
 uidChase        = "0473FF5AA74A80"
 uidMarkus       = "045ACC125D4981"
 
-def init_usb():
+def uid_str(uid):
+    uid = np.array(uid)
+    uid = ("{:0>2X}"*len(uid)).format(*tuple(uid))
+    return uid
+
+def presence(present,pad,uid):    
+    # TODO: contact API
+    return
+
+# PAD:
+
+def pad_init():
     global dev
     dev = usb.core.find(idVendor=0x0e6f, idProduct=0x0241)
     if dev is None:
@@ -76,17 +87,7 @@ def pad_color(pad, colour):
     pad_command(dev,[0x55, 0x06, 0xc0, 0x02, pad, colour[0], colour[1], colour[2],])
     return
 
-def uid_str(uid):
-    uid = np.array(uid)
-    uid = ("{:0>2X}"*len(uid)).format(*tuple(uid))
-    return uid
-
-def presence(present,pad,uid):    
-    try: subprocess.call([os.path.dirname(__file__) + '/presence.sh','1' if present else '0',str(pad),uid])
-    except: print('presence.sh not found')
-    return
-
-def tag_detected(pad,uid):
+def pad_detected(pad,uid):
     print(uid,'detected on pad',pad)
     if uid == uidMarkus: 
         pad_color(pad, WHITE)
@@ -103,12 +104,33 @@ def tag_detected(pad,uid):
     pad_color(ALL_PADS,OFF)
     return
 
-def tag_removed(pad,uid):
+def pad_removed(pad,uid):
     print(uid,'removed from pad',pad)
     if uid == uidCustom01:
         if pad == CENTER_PAD: presence(False,pad,uid)
     pad_color(pad, OFF)
     return
+
+def pad_tick():
+    try:
+        in_packet = dev.read(0x81, 32, timeout = 10)
+        bytelist = list(in_packet)
+        if not bytelist:
+            pass
+        elif bytelist[0] != 0x56: # NFC packets start with 0x56
+            pass
+        else:
+            pad = bytelist[2]
+            uid = uid_str(bytelist[6:13])
+            action = bytelist[5]
+            if   action == TAG_INSERTED : pad_detected(pad,uid)
+            elif action == TAG_REMOVED  : pad_removed(pad,uid)
+            else : print('unkown action: ' + action)
+    except usb.USBError as err:
+        pass
+    return
+
+# POM:
 
 def pom_init():
     global now, pom
@@ -126,30 +148,15 @@ def pom_tick():
     now = dt.datetime.now()
     return
 
+# MAIN:
+
 def main():
-    init_usb()
+    pad_init()
     pom_init()
     np.set_printoptions(formatter={'int':hex})
     if dev != None :
         while True:
-            # toy pad operations
-            try:
-                in_packet = dev.read(0x81, 32, timeout = 10)
-                bytelist = list(in_packet)
-                if not bytelist:
-                    pass
-                elif bytelist[0] != 0x56: # NFC packets start with 0x56
-                    pass
-                else:
-                    pad = bytelist[2]
-                    uid = uid_str(bytelist[6:13])
-                    action = bytelist[5]
-                    if   action == TAG_INSERTED : tag_detected(pad,uid)
-                    elif action == TAG_REMOVED  : tag_removed(pad,uid)
-                    else : print('unkown action: ' + action)
-            except usb.USBError as err:
-                pass
-            # pomodoro operations
+            pad_tick()
             pom_tick()
     return
 
