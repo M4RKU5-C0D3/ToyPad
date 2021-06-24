@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from sys import intern
 import usb.core
 import usb.util
 import numpy as np
@@ -7,6 +8,8 @@ import os
 import subprocess
 import time
 import datetime as dt
+
+#from .pad import pad
 
 TOYPAD_INIT = [0x55, 0x0f, 0xb0, 0x01, 0x28, 0x63, 0x29, 0x20, 0x4c, 0x45, 0x47, 0x4f, 0x20, 0x32, 0x30, 0x31, 0x34, 0xf7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
 
@@ -133,18 +136,32 @@ def pad_tick():
 # POM:
 
 def pom_init():
-    global now, pom
+    global now, pom_break, pom_work
     now = dt.datetime.now()
-    pom = dt.datetime.now()
+    pom_break = dt.datetime.now()
+    pom_work = dt.datetime.now()
     return
 
+pad_toggle = False
 def pom_tick():
-    global now, pom
-    if pom <= now :
-        pom = now + dt.timedelta(0,1800)
-        pad_color(ALL_PADS,RED)
-        time.sleep(1)
-        pad_color(ALL_PADS,OFF)
+    global now, pom_break, pom_work, pad_toggle
+
+    if pom_break < now: # start break
+        pom_break = now + dt.timedelta(0,60*28) # start next break 28 minutes after now
+        pad_color(CENTER_PAD,[0xFF,0x00,0x00])
+        print('have a break')
+    if pom_work < now: # start working
+        pom_work = pom_break + dt.timedelta(0,60*2) # start next work 2 minutes after next break
+        pad_color(CENTER_PAD,OFF)
+        print('start working')
+
+    # if pad_toggle:
+    #     pad_toggle = False
+    #     pad_color(RIGHT_PAD,[0xFF,0x00,0x00])
+    # else:
+    #     pad_toggle = True
+    #     pad_color(RIGHT_PAD,OFF)
+
     now = dt.datetime.now()
     return
 
@@ -158,6 +175,7 @@ def main():
         while True:
             pad_tick()
             pom_tick()
+            time.sleep(0.5)
     return
 
 if __name__ == '__main__':
