@@ -42,14 +42,22 @@ def pom_tick():
     now = dt.datetime.now()
     return
 
+def available(pad: toypad):
+    print('Available')
+    pad.color(pad.CENTER,pad.OFF)
+
+def offline(pad: toypad):
+    print('Offline')
+    pad.color(pad.CENTER,pad.RED)
 
 def main():
     pad = toypad()
+    pad.on(pad.CENTER,pad.TID_Markus,pad.INSERT,available)
+    pad.on(pad.CENTER,pad.TID_Markus,pad.REMOVE,offline)
     np.set_printoptions(formatter={'int':hex})
     if pad.dev() != None :
         while True:
             pad.tick()
-            time.sleep(0.5)
     return
 
 if __name__ == '__main__':

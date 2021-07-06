@@ -38,6 +38,8 @@ class toypad:
     TID_Chase        = "0473FF5AA74A80"
     TID_Markus       = "045ACC125D4981"
 
+    events = {}
+
     def __init__(self):
         global dev
         dev = usb.core.find(idVendor=0x0e6f, idProduct=0x0241)
@@ -75,13 +77,20 @@ class toypad:
         dev.write(1, message)
         return
 
-    def detected(self,pad,uid):
-        print(uid,'detected on pad',pad)
+    def color(self, pad, color):
+        self.command([0x55, 0x06, 0xc0, 0x02, pad, color[0], color[1], color[2]])
         return
 
-    def removed(self,pad,uid):
-        print(uid,'removed from pad',pad)
-        return
+    def ekey(self,pid,tid,action):
+        return '{}{}{}'.format(pid,tid,action)
+
+    def on(self, pid,tid,action, _callback = None):
+        self.events[self.ekey(pid,tid,action)] = _callback;
+
+    def trigger(self, pid,tid,action):
+        print(pid,tid,action)
+        if self.ekey(pid,tid,action) in self.events:
+            self.events[self.ekey(pid,tid,action)](self)
 
     def tick(self):
         global dev
@@ -96,9 +105,7 @@ class toypad:
                 pid = bytelist[2] # = Pad ID
                 tid = self.tidstr(bytelist[6:13]) # = Tag ID
                 action = bytelist[5]
-                if   action == self.INSERT : self.detected(pid,tid)
-                elif action == self.REMOVE : self.removed(pid,tid)
-                else : print('unkown action: ' + action)
+                self.trigger(pid,tid,action)
         except usb.USBError as err:
             pass
         return
