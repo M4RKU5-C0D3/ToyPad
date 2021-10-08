@@ -1,3 +1,4 @@
+.idea
 *.service
 !*.dist
 __pycache__

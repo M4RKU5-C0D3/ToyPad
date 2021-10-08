@@ -3,7 +3,7 @@ Description=ToyPad
 
 [Service]
 Type=simple
-ExecStart=${CPD}/toypad.py
+ExecStart=${CPD}/main.py
 
 [Install]
 WantedBy=multi-user.target
