@@ -2,7 +2,7 @@
 CPD="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 sudo apt-get -qqy update
-sudo apt-get -qqy install python-usb
+sudo apt-get -qqy install python3-pip python-usb
 
 pip3 install pyusb
 

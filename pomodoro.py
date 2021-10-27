@@ -16,7 +16,7 @@ class pomodoro:
         return
 
     def on(self, event, _callback=None):
-        self.events[event] = _callback;
+        self.events[event] = _callback
 
     def trigger(self, event):
         if event in self.events:
