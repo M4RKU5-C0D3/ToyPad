@@ -108,6 +108,7 @@ def main():
     mqttc.on_connect = on_connect
     mqttc.username_pw_set('markus', 'W3FRht9YDJfAxQnr')
     mqttc.connect("xerxes.fritz.box", 1883, 60)
+    mqttc.loop_start()
     Notify('ToyPad', 'Ready...').send()
     while True:
         pad.tick()
