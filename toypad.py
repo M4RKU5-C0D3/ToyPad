@@ -43,7 +43,7 @@ class ToyPad:
 
     events = {}
 
-    def __init__(self):
+    def connect(self):
         global dev
         dev = usb.core.find(idVendor=0x0e6f, idProduct=0x0241)
         if dev is None:
@@ -54,6 +54,7 @@ class ToyPad:
             print((usb.util.get_string(dev, dev.iProduct)))
             dev.set_configuration()
             dev.write(1, self.INIT)
+        return dev is not None
 
     @staticmethod
     def dev():

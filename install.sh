@@ -4,7 +4,7 @@ CPD="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 sudo apt-get -qqy update
 sudo apt-get -qqy install python3-pip python-usb
 
-pip3 install pyusb
+pip3 install pyusb numpy
 
 echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="0e6f", ATTR{idProduct}=="0241", MODE="0666"' | sudo tee /etc/udev/rules.d/99-dimensions.rules
 
