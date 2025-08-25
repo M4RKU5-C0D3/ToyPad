@@ -2,3 +2,7 @@
 *.service
 !*.dist
 __pycache__
+/=*
+/log.sh
+/usb/*
+/usb.*
