@@ -35,7 +35,7 @@ class ToyPad:
     TID_WildStyle = "044DB2FA9D4880"
     TID_Badman = "04F3439A134380"
     TID_Abbey = "04677292284980"
-    TID_Custom01 = "044731F27C4981"
+    TID_Carrot = "044731F27C4981"
     TID_BadCop = "0441651AA34880"
     TID_Benny = "049E0E325C4984"
     TID_Chase = "0473FF5AA74A80"

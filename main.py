@@ -89,18 +89,48 @@ def on_connect(client, userdata, flags, reason_code, properties):
 
 # endregion
 
+# Statische Token-Aktions-Konfiguration mit direkten Konstanten
+def get_actions(pad):
+    return {
+        pad.TID_Markus: {
+            pad.LEFT: {
+                pad.INSERT: busy,
+                pad.REMOVE: away
+            },
+            pad.CENTER: {
+                pad.INSERT: available,
+                pad.REMOVE: away
+            },
+            pad.RIGHT: {
+                pad.INSERT: dnd,
+                pad.REMOVE: away
+            }
+        },
+        pad.TID_Carrot: {
+            pad.CENTER: {
+                pad.INSERT: lunch,
+                pad.REMOVE: re
+            }
+        }
+    }
+
 def main():
     global pad, pom, mqttc
     pad = ToyPad()
     while not pad.connect():
         time.sleep(5)
     pad.flash(pad.ALL, pad.GREEN)
-    pad.on(pad.CENTER, pad.TID_Markus, pad.REMOVE, away)
-    pad.on(pad.CENTER, pad.TID_Markus, pad.INSERT, available)
-    pad.on(pad.LEFT, pad.TID_Markus, pad.INSERT, busy)
-    pad.on(pad.RIGHT, pad.TID_Markus, pad.INSERT, dnd)
-    pad.on(pad.CENTER, pad.TID_Custom01, pad.INSERT, lunch)
-    pad.on(pad.CENTER, pad.TID_Custom01, pad.REMOVE, re)
+
+    # Token-Aktionen mit direkten Konstanten
+    actions = get_actions(pad)
+    
+    # Registrierung aller Token-Aktionen - komplett ohne Mappings
+    for token_id, pad_configs in actions.items():
+        for pad_pos, event_configs in pad_configs.items():
+            for event_type, action_func in event_configs.items():
+                pad.on(pad_pos, token_id, event_type, action_func)
+
+    # POMODORO
     pom = pomodoro(28, 2)
     pom.on('break', pom_break)
     pom.on('work', pom_work)
