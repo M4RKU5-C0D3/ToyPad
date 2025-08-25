@@ -9,6 +9,10 @@ import os
 import threading
 import time
 import paho.mqtt.client as mqtt
+from dotenv import load_dotenv
+
+# Lade Umgebungsvariablen aus .env Datei
+load_dotenv()
 
 
 # region status
@@ -87,6 +91,7 @@ def on_connect(client, userdata, flags, reason_code, properties):
     print(f"Connected with result code {reason_code}")
     mqttc.publish("toypad/event", "connected")
 
+
 # endregion
 
 # Statische Token-Aktions-Konfiguration mit direkten Konstanten
@@ -114,6 +119,7 @@ def get_actions(pad):
         }
     }
 
+
 def main():
     global pad, pom, mqttc
     pad = ToyPad()
@@ -123,7 +129,7 @@ def main():
 
     # Token-Aktionen mit direkten Konstanten
     actions = get_actions(pad)
-    
+
     # Registrierung aller Token-Aktionen - komplett ohne Mappings
     for token_id, pad_configs in actions.items():
         for pad_pos, event_configs in pad_configs.items():
@@ -134,15 +140,25 @@ def main():
     pom = pomodoro(28, 2)
     pom.on('break', pom_break)
     pom.on('work', pom_work)
+
+    # MQTT Konfiguration aus Umgebungsvariablen
     mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     mqttc.on_connect = on_connect
-    mqttc.username_pw_set('markus', 'W3FRht9YDJfAxQnr')
-    mqttc.connect("xerxes.fritz.box", 1883, 60)
+    mqttc.username_pw_set(
+        os.getenv('MQTT_USERNAME'),
+        os.getenv('MQTT_PASSWORD')
+    )
+    mqttc.connect(
+        os.getenv('MQTT_HOST', 'localhost'),
+        int(os.getenv('MQTT_PORT', '1883')),
+        60
+    )
     mqttc.loop_start()
     Notify('ToyPad', 'Ready...').send()
     while True:
         pad.tick()
         pom.tick()
+
 
 if __name__ == '__main__':
     main()
