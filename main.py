@@ -26,50 +26,51 @@ SCRIPT_LUNCH = '/home/martens/apps/mittag.sh'
 SCRIPT_MEET_MENU = '/home/martens/apps/meet/menu.sh'
 SCRIPT_RETURN = '/home/martens/apps/return.sh'
 
+
 class StatusHandler:
     def __init__(self, toy_pad: ToyPad, mqtt_client):
         self.toy_pad = toy_pad
         self.mqtt_client = mqtt_client
 
     @staticmethod
-    def _launch_with_sound(command, sound=DEFAULT_SOUND):
+    def _launch_with_sound(command, sound=SOUND_DEFAULT):
         threading.Thread(target=os.system, args=(command,)).start()
         playsound(sound)
 
     def handle_available(self, pad, pid, tid, action):
         print('Available:', pid, tid, action)
         self.mqtt_client.publish("toypad/event", "available")
-        self._launch_with_sound(CLIQ_READY_SCRIPT, DEVICE_ADDED_SOUND)
+        self._launch_with_sound(SCRIPT_CLIQ_READY, SOUND_DEVICE_ADDED)
         pad.flash(pid, pad.GREEN)
 
     def handle_away(self, pad, pid, tid, action):
         print('Away:', pid, tid, action)
         self.mqtt_client.publish("toypad/event", "away")
-        self._launch_with_sound(CLIQ_AFK_SCRIPT, DEVICE_REMOVED_SOUND)
+        self._launch_with_sound(SCRIPT_CLIQ_AFK, SOUND_DEVICE_REMOVED)
         pad.flash(pid, pad.YELLOW)
 
     def handle_busy(self, pad, pid, tid, action):
         print('Busy: ', pid, tid, action)
         self.mqtt_client.publish("toypad/event", "busy")
-        self._launch_with_sound(MEET_MENU_SCRIPT)
+        self._launch_with_sound(SCRIPT_MEET_MENU)
         pad.flash(pid, pad.RED)
 
     def handle_dnd(self, pad, pid, tid, action):
         print('DND: ', pid, tid, action)
         self.mqtt_client.publish("toypad/event", "dnd")
-        self._launch_with_sound(CLIQ_DND_SCRIPT)
+        self._launch_with_sound(SCRIPT_CLIQ_DND)
         pad.flash(pid, pad.RED)
 
     def handle_lunch(self, pad, pid, tid, action):
         print('Lunch: ', pid, tid, action)
         self.mqtt_client.publish("toypad/event", "lunch")
-        self._launch_with_sound(LUNCH_SCRIPT, DEVICE_REMOVED_SOUND)
+        self._launch_with_sound(SCRIPT_LUNCH, SOUND_DEVICE_REMOVED)
         pad.flash(pid, pad.RED)
 
     def handle_return(self, pad, pid, tid, action):
         print('Return:', pid, tid, action)
         self.mqtt_client.publish("toypad/event", "return")
-        self._launch_with_sound(RETURN_SCRIPT, DEVICE_ADDED_SOUND)
+        self._launch_with_sound(SCRIPT_RETURN, SOUND_DEVICE_ADDED)
         pad.flash(pid, pad.GREEN)
 
 
@@ -81,13 +82,13 @@ class PomodoroHandler:
         print('break:', pomodoro_instance)
         self.toy_pad.color(self.toy_pad.ALL, self.toy_pad.RED)
         Notify('Pomodoro', 'Take a break!').send()
-        playsound(POMODORO_SOUND)
+        playsound(SOUND_POMODORO)
 
     def handle_work(self, pomodoro_instance):
         print('work:', pomodoro_instance)
         self.toy_pad.color(self.toy_pad.ALL, self.toy_pad.OFF)
         Notify('Pomodoro', 'Get back to work...').send()
-        playsound(POMODORO_SOUND)
+        playsound(SOUND_POMODORO)
 
 
 def create_mqtt_client():
